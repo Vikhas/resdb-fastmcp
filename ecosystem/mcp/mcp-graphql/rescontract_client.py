@@ -171,6 +171,13 @@ class ResContractClient:
                 "details": [],
                 "message": f"Error checking replicas: {e}"
             }
+        except FileNotFoundError:
+            return {
+                "count": 0,
+                "running": True, # Assume running if we can't check (cloud mode)
+                "details": [],
+                "message": "Replica check skipped (system command 'ps' not found). Assuming remote connection."
+            }
 
     def start_replica_cluster(self) -> str:
         """Start/restart the ResilientDB replica cluster."""

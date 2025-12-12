@@ -624,8 +624,8 @@ async def getConsensusMetrics() -> str:
 @mcp.tool()
 async def debugEnvironment() -> str:
     """Debug the server environment. Lists installed packages and verifies imports."""
-    import pkg_resources
     import sys
+    import importlib.metadata
     
     report = []
     report.append("=== Python Version ===")
@@ -635,7 +635,8 @@ async def debugEnvironment() -> str:
     report.append("\n".join(sys.path))
     
     report.append("\n=== Installed Packages ===")
-    installed_packages = sorted([f"{i.key}=={i.version}" for i in pkg_resources.working_set])
+    dists = importlib.metadata.distributions()
+    installed_packages = sorted([f"{d.metadata['Name']}=={d.version}" for d in dists])
     report.append("\n".join(installed_packages))
     
     report.append("\n=== Import Tests ===")
