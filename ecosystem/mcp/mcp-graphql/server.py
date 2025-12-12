@@ -289,19 +289,30 @@ async def postTransaction(operation: str, amount: int, asset: Any, signerPublicK
         asyncio.create_task(send_monitoring_data("postTransaction", args, result, duration))
 
 @mcp.tool()
-async def analyzeTransactions(transactionIds: List[str]) -> str:
-    """Analyze a set of transactions by their IDs and compute summary statistics. Returns summary with counts by operation type, amount statistics (min/max/average), distinct types, signers, and public keys. Also returns raw transaction data and any errors encountered. Useful for understanding transaction patterns and identifying outliers."""
+async def analyzeTransactions(transactionIds: str) -> str:
+    """
+    Analyze a set of transactions by their IDs and compute summary statistics.
+    
+    Args:
+        transactionIds: A JSON string containing a list of transaction IDs to analyze.
+    """
     start_time = time.time()
     result = None
     try:
-        if not transactionIds:
-            raise ValueError("transactionIds list cannot be empty")
-        
+        # Parse the input string as JSON
+        try:
+            ids = json.loads(transactionIds)
+            if not isinstance(ids, list):
+                return json.dumps({"error": "Input must be a JSON list of strings"}, indent=2)
+        except json.JSONDecodeError:
+             # Fallback: try to split by comma if not valid JSON
+            ids = [x.strip() for x in transactionIds.split(',') if x.strip()]
+            
         # Limit to 20 transactions to avoid performance issues
-        if len(transactionIds) > 20:
-            transactionIds = transactionIds[:20]
+        if len(ids) > 20:
+            ids = ids[:20]
         
-        res = await analyze_transactions_internal(transactionIds)
+        res = await analyze_transactions_internal(ids)
         result = json.dumps(res, indent=2)
         return result
     finally:
