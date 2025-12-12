@@ -3,5 +3,8 @@ pydantic>=2.0.0
 httpx>=0.25.0
 python-dotenv>=1.0.0
 cryptoconditions>=0.8.1
+base58>=2.1.0
+PyNaCl>=1.4.0
+pyasn1>=0.4.8
 
 
