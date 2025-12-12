@@ -40,29 +40,7 @@ async def send_monitoring_data(tool_name: str, args: dict, result: Any, duration
     except Exception as e:
         print(f"Failed to send monitoring data to ResLens: {e}", file=sys.stderr)
 
-# Helper functions
-def _setup_resilientdb_path() -> str:
-    """Setup path to ResilientDB resdb_driver for key generation."""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    possible_paths = [
-        os.path.join(script_dir, '../../graphql/resdb_driver'),
-        '/Users/rahul/data/workspace/kanagrah/incubator-resilientdb/ecosystem/graphql/resdb_driver',
-        os.path.join(script_dir, '../graphql/resdb_driver'),
-        os.path.join(script_dir, '../../../ecosystem/graphql/resdb_driver'),
-    ]
-    
-    for path in possible_paths:
-        abs_path = os.path.abspath(path)
-        if os.path.exists(abs_path):
-            if abs_path not in sys.path:
-                sys.path.insert(0, abs_path)
-            return abs_path
-    
-    raise ImportError(
-        f"Could not find ResilientDB resdb_driver directory. "
-        f"Tried: {', '.join([os.path.abspath(p) for p in possible_paths])}"
-    )
+
 
 def _setup_sha3_shim():
     """Setup sha3 module shim using Python's built-in hashlib for Python 3.11+."""
@@ -113,10 +91,10 @@ def generate_keypairs_internal() -> Dict[str, str]:
     Generate Ed25519 keypairs for ResilientDB transactions.
     """
     try:
-        _setup_resilientdb_path()
         # Setup sha3 shim before importing crypto (which imports sha3)
         _setup_sha3_shim()
-        from crypto import generate_keypair
+        # Import directly from local resdb_driver package
+        from resdb_driver.crypto import generate_keypair
     except ImportError as e:
         raise ImportError(
             f"Could not import generate_keypair from ResilientDB crypto module: {e}"
