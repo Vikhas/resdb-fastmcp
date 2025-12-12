@@ -622,6 +622,48 @@ async def getConsensusMetrics() -> str:
         asyncio.create_task(send_monitoring_data("getConsensusMetrics", {}, result, duration))
 
 @mcp.tool()
+async def debugEnvironment() -> str:
+    """Debug the server environment. Lists installed packages and verifies imports."""
+    import pkg_resources
+    import sys
+    
+    report = []
+    report.append("=== Python Version ===")
+    report.append(sys.version)
+    
+    report.append("\n=== Sys Path ===")
+    report.append("\n".join(sys.path))
+    
+    report.append("\n=== Installed Packages ===")
+    installed_packages = sorted([f"{i.key}=={i.version}" for i in pkg_resources.working_set])
+    report.append("\n".join(installed_packages))
+    
+    report.append("\n=== Import Tests ===")
+    
+    # Test base58
+    try:
+        import base58
+        report.append(f"✅ base58 imported successfully: {base58.__file__}")
+    except ImportError as e:
+        report.append(f"❌ base58 failed to import: {e}")
+        
+    # Test cryptoconditions
+    try:
+        import cryptoconditions
+        report.append(f"✅ cryptoconditions imported successfully: {cryptoconditions.__file__}")
+    except ImportError as e:
+        report.append(f"❌ cryptoconditions failed to import: {e}")
+        
+    # Test resdb_driver
+    try:
+        import resdb_driver
+        report.append(f"✅ resdb_driver imported successfully: {resdb_driver.__file__}")
+    except ImportError as e:
+        report.append(f"❌ resdb_driver failed to import: {e}")
+
+    return "\n".join(report)
+
+@mcp.tool()
 async def archiveLogs() -> str:
     """Archive all current log files to a ZIP file. Creates a timestamped ZIP file containing server0-3.log, client.log, and configuration files."""
     start_time = time.time()
